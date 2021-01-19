@@ -1,0 +1,283 @@
+{% extends 'main.html' %}
+{% load humanize %}
+
+{% block main %}
+<div class="col-12 col-md-6 order-2 mb-3" id="main">
+    <div class="sticky-top">
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non, nostrum.
+
+
+        <div class="mobile-post-form">
+            <button id="mobile-post" class="open-button" onclick="openForm()">Post</button>
+            <div class="form-popup" id="myForm">
+                <form class="addPost" action="" method="POST">
+                    <div class="form-group">
+                        {% csrf_token %}
+                        {{form.content}}
+
+                    </div>
+                    <input class="btn btn-primary" type="submit" value="Post" onclick="closeForm()">
+                    <button type="button" class="btn btn-secondary" onclick="closeForm()">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <h1>Main Area</h1>
+
+
+    
+    <div class="border rounded border-top-0 p-2 flex-column align-items-start mb-4">
+        <div class="d-flex w-100 justify-content-between">
+
+            <div class="row w-100">
+                <div class="col-1" id="userinfo">
+                    <a href="">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                </div>
+                <div class="col-11">
+                    <h5 class="mb-1 mt-0 d-inline-block">
+                        <a href="{{ post.poster_url }}">{{post.poster}}</a>
+                    </h5>
+
+                    <small class="text-muted">
+                        {{ post.created|timesince}} ago
+                    </small>
+                        <p>
+                            {{post.content}}
+                        </p>
+
+                    <div class="d-flex w-100 justify-content-between post-operation">
+
+                        {% if post.id in request.user.liked %}
+                            <i class="fa fa-thumbs-up unlike text-danger" name={{post.id}}> {{post.like_count}}</i>
+                        {% else %}
+                            <i class="fa fa-thumbs-up like text-dark" name={{post.id}}> {{post.like_count}} </i>
+                        {% endif %}
+
+
+                        <i class="fa fa-comment"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form action="" method="post" id="comment-form">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ comment.content }}    
+        </div>
+        <input class="btn btn-outline-secondary" type="submit" value="Comment">
+    </form>
+    
+        <p>Comments:</p>
+
+    <div class="new-comment">
+
+    </div>    
+    
+
+
+{% for item in comments %}
+    <div class="border rounded border-top-0 p-2 flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+
+            <div class="row w-100">
+                <div class="col-1" id="userinfo">
+                    <a href="">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                </div>
+                <div class="col-11">
+                    <h5 class="mb-1 mt-0 d-inline-block">
+                        <a href="{{ item.poster_url }}">{{item.poster}}</a>
+                    </h5>
+
+                    <small class="text-muted">
+                        {{ item.created|timesince}} ago
+                    </small>
+                    <a href="{{ item.post_url }}" class="text-decoration-none d-block text-dark mb-2">
+                        {{item.content}}
+                    </a>
+
+                    <div class="d-flex w-100 justify-content-between post-operation">
+
+                        {% if item.id in request.user.liked %}
+                            <i class="fa fa-thumbs-up unlike text-danger" name={{item.id}}> {{item.like_count}}</i>
+                        {% else %}
+                            <i class="fa fa-thumbs-up like text-dark" name={{item.id}}> {{item.like_count}} </i>
+                        {% endif %}
+
+
+                        <a href="{{ item.post_url }}" class="text-decoration-none d-block text-dark">
+                            <i class="fa fa-comment"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+</div>
+{% endblock main %}
+
+
+
+{% block js %}
+
+
+<script>
+    $(".addPost").submit(function (e) {
+        e.preventDefault();
+        var serializedData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'add_post' %}",
+            data: serializedData,
+            success: function (response) {
+                $(".addPost").trigger('reset');
+                var instance = JSON.parse(response["instance"]);
+                var fields = instance[0]["fields"];
+                var post_url = '{% url "post_detail" user=request.user.username post_id=0 %}'.replace('0', instance[0].pk);
+                $("#new-post").prepend(
+                    `<div class="border rounded border-top-0 p-2 flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="row w-100">
+                            <div class="col-1" id="userinfo">
+                                <a href="">
+                                    <i class="fa fa-user-circle-o"></i>
+                                </a>
+                            </div>
+                        <div class="col-11">
+                            <h5 class="mb-1 mt-0 d-inline-block">
+                                <a href="{{ request.user.get_absolute_url }}">{{request.user}}</a>
+                            </h5>
+
+                            <small class="text-muted">
+                                Now
+                            </small>
+
+                            <a href="${post_url}" class="text-decoration-none d-block text-dark mb-2">
+                            ${fields["content"] || ""}
+                            </a>
+
+                            <div class="d-flex w-100 justify-content-between">
+                                <i class="fa fa-thumbs-up like text-dark" name=${instance[0].pk}> </i>
+                                <a href="${post_url}" class="text-decoration-none d-block text-dark">
+                                    <i class="fa fa-comment"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+                </div>`
+                );
+            },
+            error: function (response) {
+                alert(response["responseJSON"]["error"]);
+            }
+        })
+    })
+
+
+    $('body').on('click', '.like', function(){
+    
+        var element = this;
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'like' %}",
+                data: {
+                    'id': $(this).attr('name'),
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                },
+
+                dataType: 'html',
+                success:  function(data, jqXHR) {
+                var data = $.parseJSON(data)
+                $(element).html(" "+data['likes_count']);
+                $(element).removeClass('text-dark').addClass('text-danger');
+                $(element).removeClass('like').addClass('unlike');
+            }
+            });
+});
+
+
+    $('body').on('click', '.unlike', function(){
+    var element = this;
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'unlike' %}",
+                data: {
+                    'id': $(this).attr('name'),
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                },
+
+                dataType: 'html',
+                success:  function (data, jqXHR) {
+                var data = $.parseJSON(data)
+                $(element).html(" "+data['likes_count']);
+                $(element).removeClass('text-danger').addClass('text-dark');
+                $(element).removeClass('unlike').addClass('like');
+            }
+            });
+});
+
+
+
+
+$("#comment-form").submit(function (e) {
+        e.preventDefault();
+        var serializedData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'new_comment' post.id %}",
+            data: serializedData,
+            success: function (response) {
+                $("#comment-form").trigger('reset');
+                var instance = JSON.parse(response["instance"]);
+                var fields = instance[0]["fields"];
+                var post_url = '{% url "post_detail" user=request.user.username post_id=0 %}'.replace('0', instance[0].pk);
+                $(".new-comment").prepend(
+                    `<div class="border rounded border-top-0 p-2 flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+
+            <div class="row w-100">
+                <div class="col-1" id="userinfo">
+                    <a href="">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                </div>
+                <div class="col-11">
+                    <h5 class="mb-1 mt-0 d-inline-block">
+                                <a href="{{ request.user.get_absolute_url }}">{{request.user}}</a>
+                    </h5>
+
+                    <small class="text-muted">
+                        Now
+                    </small>
+                    <a href="${post_url}" class="text-decoration-none d-block text-dark mb-2">
+                        ${fields["content"] || ""}
+                    </a>
+
+                    <div class="d-flex w-100 justify-content-between post-operation">
+                        <i class="fa fa-thumbs-up like text-dark" name=${instance[0].pk}> </i>
+                        <a href="${post_url}" class="text-decoration-none d-block text-dark">
+                            <i class="fa fa-comment"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`
+                );
+            },
+            error: function (response) {
+                alert(response["responseJSON"]["error"]);
+            }
+        })
+    })
+
+</script>
+{% endblock js %}

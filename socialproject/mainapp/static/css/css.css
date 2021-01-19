@@ -1,0 +1,52 @@
+#userinfo *{
+    margin-right: 10px;
+    font-size: 30px;
+}
+
+
+
+.mobile-post-form{
+    display: none;
+}
+
+textarea{
+    resize: none;
+}
+
+#main .sticky-top{
+    background-color: white;
+}
+
+.open-button {
+    background-color: #555;
+    color: white;
+    padding: 7px 3px;
+    border: none;
+    cursor: pointer;
+    opacity: 0.8;
+    position: fixed;
+    bottom: 23px;
+    right: 28px;
+    border-radius: 50%;
+}
+.form-popup {
+    padding:0 5px;
+    display: none;
+    position: fixed;
+    bottom: 23px;
+    left: 0;
+    right: 0;
+    z-index: 9;
+}
+.post-operation i:hover{
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 768px) {
+    #sticky-sidebar>.sticky-top{
+        position: relative;
+    } 
+    .mobile-post-form{
+        display: inline-block;
+    }
+}

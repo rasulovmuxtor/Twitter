@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}
+Sign-Up
+{% endblock title %}
+
+{% block content %}
+<div class="login-form">
+    <form action="" method="POST">
+        {% csrf_token %}
+        <div class="text-center social-btn">
+			<a href="{% provider_login_url 'github' %}" class="btn btn-danger btn-lg btn-block"><i class="fa fa-github"></i> Sign up with <b>GitHub</b></a>
+        </div>	
+        <div class="text-center social-btn">
+			<a href="{% provider_login_url 'google' %}" class="btn btn-danger btn-lg btn-block"><i class="fa fa-google"></i> Sign up with <b>Google</b></a>
+        </div>
+        <div class="or-seperator"><b>or</b></div>
+        
+        <h2 class="text-center">Log in</h2>       
+        {% for field in form %}
+        <div class="form-group">
+            {{ field }}
+            {% if field.errors %}
+                <span class="text-danger">
+                        {{ field.errors|striptags }}
+                </span>
+            {% endif %}
+        </div>
+        {% endfor %}
+         
+        <div class="form-group">
+            <button type="submit" class="btn btn-success btn-lg btn-block login-btn">Sign Up</button>
+        </div>
+        <div class="text-center"><span class="text-muted">Do you have an account?</span> <a class="font-sm-css" href="{% url 'signin' %}">Sign in here</a></div>
+
+    </form>
+    </div>
+{% endblock content %}

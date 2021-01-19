@@ -1,0 +1,157 @@
+{% extends 'main.html' %}
+{% load humanize %}
+
+{% block main %}
+<div class="col-12 col-md-6 order-2 mb-3" id="main">
+    <div class="sticky-top">
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non, nostrum.
+
+
+        <div class="mobile-post-form">
+            <button id="mobile-post" class="open-button" onclick="openForm()">Post</button>
+            <div class="form-popup" id="myForm">
+                <form class="addPost" action="" method="POST">
+                    <div class="form-group">
+                        {% csrf_token %}
+                        {{form.content}}
+
+                    </div>
+                    <input class="btn btn-primary" type="submit" value="Post" onclick="closeForm()">
+                    <button type="button" class="btn btn-secondary" onclick="closeForm()">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <h1>
+        {{profile}}
+    </h1>
+
+
+    
+    <div class="border rounded border-top-0 p-2 flex-column align-items-start mb-4">
+        <div class="d-flex w-100 justify-content-between">
+
+            <div class="row w-100">
+                <div class="col-1" id="userinfo">
+                    <a href="">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                </div>
+                <div class="col-11">
+                    <h5 class="mb-1 mt-0 d-inline-block">
+                        {{profile}}
+                    </h5>
+
+                    <small class="text-muted">
+                        {{ profile.last_login|timesince}} ago
+                    </small>
+                        <p>
+                            Username: {{profile.username}}
+                        </p>
+                        
+                        {% if profile.firstname %}
+                        <p>
+                            Name: {{profile.firstname}} {{profile.lastname}}
+                        </p>
+                        {% endif %}
+                        
+                        
+                        {% if profile.bio %}
+                        <p>
+                            Bio: {{profile.bio}}
+                        </p>
+                        {% endif %}
+                            
+                        
+                        
+                        
+                        {% if profile.date_of_birth %}
+                        <p>
+                            Date of birth: {{profile.date_of_birth}}
+                        </p>
+                        {% endif %}
+
+                        
+                        {% if following %}
+                            <p class="mt-3">Following: {{following}}</p>
+                        {% endif %}
+                        {% if following %}
+                            <p class="mt-3">Followers: {{followers}}</p>
+                        {% endif %}
+                            
+                            
+                        
+                        
+
+                    <div class="d-flex w-100 justify-content-between post-operation">
+
+                        {% if profile.website %}
+                            <a href="">{{profile.website}}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main %}
+
+
+
+{% block js %}
+
+
+<script>
+    $(".addPost").submit(function (e) {
+        e.preventDefault();
+        var serializedData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'add_post' %}",
+            data: serializedData,
+            success: function (response) {
+                $(".addPost").trigger('reset');
+                var instance = JSON.parse(response["instance"]);
+                var fields = instance[0]["fields"];
+                var post_url = '{% url "post_detail" user=request.user.username post_id=0 %}'.replace('0', instance[0].pk);
+                $("#new-post").prepend(
+                    `<div class="border rounded border-top-0 p-2 flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="row w-100">
+                            <div class="col-1" id="userinfo">
+                                <a href="">
+                                    <i class="fa fa-user-circle-o"></i>
+                                </a>
+                            </div>
+                        <div class="col-11">
+                            <h5 class="mb-1 mt-0 d-inline-block">
+                                <a href="{{ request.user.get_absolute_url }}">{{request.user}}</a>
+                            </h5>
+
+                            <small class="text-muted">
+                                Now
+                            </small>
+
+                            <a href="${post_url}" class="text-decoration-none d-block text-dark mb-2">
+                            ${fields["content"] || ""}
+                            </a>
+
+                            <div class="d-flex w-100 justify-content-between">
+                                <i class="fa fa-thumbs-up like text-dark" name=${instance[0].pk}> </i>
+                                <a href="${post_url}" class="text-decoration-none d-block text-dark">
+                                    <i class="fa fa-comment"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+                </div>`
+                );
+            },
+            error: function (response) {
+                alert(response["responseJSON"]["error"]);
+            }
+        })
+    })
+</script>
+{% endblock js %}

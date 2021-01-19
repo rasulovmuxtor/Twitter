@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+ 
+    <script src="{% static 'js/javascript.js' %}" type="text/javascript"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="{% static 'css/css.css' %}">
+    <script>
+    </script>
+    <title>
+        
+        {% if request.user.is_authenticated %}
+            {{ request.user.username }}
+        {% else %}
+            Dashboard
+        {% endif %}
+            
+    </title>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-md-2 order-3" id="sticky-sidebar">
+                <div class="sticky-top">
+                    <nav class="navbar navbar-light bg-light">
+                        <a class="navbar-brand" href="#"><i class="fa fa-cog"></i> Navbar</a>
+                        <a href="#" class="badge badge-secondary">12</a>
+                        
+                      </nav>
+    
+                      <nav class="navbar navbar-light bg-light">
+                        <span class="navbar-brand mb-0 h1"><i class="fa fa-bookmark"></i> Navbar</span>
+                      </nav>
+                  
+                </div>
+            </div>
+            <div class="col-12 col-md-4" id="sticky-sidebar">
+                <div class="sticky-top">
+                    <div class="mb-2">
+                        {% if request.user.is_authenticated %}
+                        <div id="userinfo" class="text-secondary">
+                            <a href="{% url 'home' %}"><span class="text-secondary">Logo</span></a>
+                            
+                            <a class="text-secondary" href="{{ request.user.get_absolute_url }}"><i class="fa fa-user-circle-o"></i>{{ request.user }}</a>
+                        </div>
+                        {% else %}
+                            Sign In Sign Up
+                        {% endif %}
+                    </div>
+                    
+                    <form class="addPost" action="" method="POST">
+                        <div class="form-group">
+                            {% csrf_token %}
+                            {{form.content}}
+                            
+                        </div>
+                        <input class="btn btn-outline-secondary" type="submit" value="Post">
+                    </form>
+                    
+                 
+                </div>
+            </div>
+
+            
+            {% block main %}
+                
+            {% endblock main %}
+                
+
+
+        
+        
+        </div>
+    </div>
+    
+
+    
+        
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    
+    {% block js %}
+        
+    {% endblock js %}
+        
+</body>
+</html>
